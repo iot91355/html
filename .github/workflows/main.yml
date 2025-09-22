@@ -19,7 +19,7 @@ jobs:
         uses: docker/login-action@v2
         with:
           username: iot91355
-          password: dckr_pat_IicwsRPM4AMAKciJAfhDb_Z-ZyU
+          password: d
 
       # Step 3: Build Docker image
       - name: Build Docker image
