@@ -1,18 +1,32 @@
-name: Docker Image CI
+name: build docker iamge and push
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  push: 
+    branch: [main]
+
+  pull-request: [main]
 
 jobs:
+    docker: 
+      runs-on :  ubuntu-latest
 
-  build:
+steps:
 
-    runs-on: ubuntu-latest
+  -name: Checkout repo
+  uses: actions/Checkoutrepo@v4
 
-    steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+  -name: Login to docker 
+  uses: docker/login-actions@v2
+
+  with: 
+    username: ${{secrets.DOCKER_USER}}  
+    passward: ${{secrets.DOCKER_PASSWARD}} 
+
+  -name : Docker image 
+  run: docker build -t ${{secrets.DOCKER_USER}}/test:latest .
+
+  -name: Test Docker container 
+  run: docker run --rm ${{secrets.DOCKER_USER}}/test:latest ls /usr/share/ngnix/html
+
+  -name: docker push image
+  uses: docker push ${{secrets.DOCKER_USER}}/test:latest 
