@@ -1,0 +1,33 @@
+name: build docker iamge and push
+
+on:
+  push: 
+    branch: [main]
+
+  pull-request: [main]
+
+jobs:
+    docker: 
+      runs-on :  ubuntu-latest
+
+steps:
+
+  -name: Checkout repo
+  uses: actions/Checkoutrepo@v4
+
+  -name: Login to docker 
+  uses: docker/login-actions@v2
+
+  with: 
+    username: ${{secrets.DOCKER_USER}}  
+    passward: ${{secrets.DOCKER_PASSWARD}} 
+
+  -name : Docker image 
+  run: docker build -t ${{secrets.DOCKER_USER}}/test:latest .
+
+  -name: Test Docker container 
+  run: docker run --rm ${{secrets.DOCKER_USER}}/test:latest ls /usr/share/ngnix/html
+
+  -name: docker push image
+  uses: docker push ${{secrets.DOCKER_USER}}/test:latest 
+
