@@ -1,7 +1,7 @@
 param(
-    [string]$Image = $1,
-    [string]$Container = $2,
-    [int]$Port = $3
+    [string]$Image,
+    [string]$Container,
+    [int]$Port
 )
 
 # Stop & remove old container if exists
