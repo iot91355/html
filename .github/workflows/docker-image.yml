@@ -1,18 +1,41 @@
-name: Docker Image CI
+name: Build, Test, and Push Docker Image
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
-
-  build:
-
+  docker:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USER  }}
+          password: ${{ secrets.DOCKER_PASSWARD }}
+
+      - name: Build Docker image
+        run: |
+          docker build -t my-nginx:test .
+
+      - name: Test Docker container
+        run: |
+          docker run -d --name test-container -p 8080:80 my-nginx:test
+          sleep 5  # wait a few seconds for container to start
+          curl -f http://localhost:8080 || exit 1
+          docker stop test-container
+          docker rm test-container
+
+      - name: Push Docker image
+        if: success()   # only run if previous steps passed
+        run: |
+          docker tag my-nginx:test ${{ secrets.DOCKER_USER }}/my-nginx:latest
+          docker push ${{ secrets.DOCKER_USER }}/my-nginx:latest
